@@ -18,7 +18,7 @@ bool inputCheck(string input) {
         return true;
     }
     for (int i = 0; i < input.size(); ++i) {
-        if (input[i] < 48 || input[i] > 57) {
+        if (input[i] < '0' || input[i] > '9') {
             return true;
         }
     }
