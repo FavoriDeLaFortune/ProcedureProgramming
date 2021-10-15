@@ -3,6 +3,8 @@
 #include <fstream>
 #include <vector>
 #include <ctime>
+#include <string>
+
 using namespace std;
 // вводится с клавиатуры число прямых, генерируемых в файл в формате kx+b=0 n,n-вес графа. все коэффициенты рандомятся в диапазоне +-3n
 // n-вес прямой (стоимость прохода по ней). найти 2 самые дорогие по стоимости перемещения друг к другу точки при условии испеользования каждой прямой не более одного раза. точки образуются на пересечении прямых
@@ -10,7 +12,6 @@ using namespace std;
 int getRandom(int n) {
     return -3 * n + (rand() % (6 * n + 1));
 }
-
 
 bool inputCheck(string input) {
     if (input[0] == '0') {
@@ -64,11 +65,25 @@ int main() {
         equat.x_k = k;
         equat.free_k = k;
         equat.cost = k;
-        write_f << k << 'x' << b << "=0 " << n << '\n';
+        MassOfLines[i] = equat;
+        write_f << k << 'x';
+        if (b == 0) {
+            write_f << "=0 " << n << '\n';
+        } else if (b > 0) {
+            write_f << '+' << b << "=0 " << n << '\n';
+        } else {
+            write_f << b << "=0 " << n << '\n';
+        }
     }
+    cout << '\n';
     write_f.close();
     ifstream read_f("input.txt");
-    cout << countOfLines << "linear equations is written in file:\n";
-    for ()
+    cout << countOfLines << " linear equations is written in file:\n";
+    for (int i = 0; i < countOfLines; ++i) {
+        string s;
+        getline(read_f, s);
+        cout << s << '\n';
+    }
+    read_f.close();
     return 0;
 }
