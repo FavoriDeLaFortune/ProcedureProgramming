@@ -59,14 +59,23 @@ int main() {
         int n;
         n = rand() % 12 + 3;
         int k, b;
-        k = getRandom(n);
+        k = 0;
+        while (k == 0) {
+            k = getRandom(n);
+        }
         b = getRandom(n);
         line equat;
         equat.x_k = k;
         equat.free_k = k;
         equat.cost = k;
         MassOfLines[i] = equat;
-        write_f << k << 'x';
+        if (k == 1) {
+            write_f << 'x';
+        } else if (k == -1) {
+            write_f << '-x';
+        } else {
+            write_f << k << 'x';
+        }
         if (b == 0) {
             write_f << "=0 " << n << '\n';
         } else if (b > 0) {
