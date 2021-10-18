@@ -4,6 +4,7 @@
 #include <vector>
 #include <ctime>
 #include <string>
+#include <set>
 
 using namespace std;
 // вводится с клавиатуры число прямых, генерируемых в файл в формате kx+b=0 n,n-вес графа. все коэффициенты рандомятся в диапазоне +-3n
@@ -39,6 +40,11 @@ struct line {
     int cost;
 };
 
+struct dot {
+    pair<int, int> coordinates;
+    vector<int> indexOfLines;
+};
+
 int main() {
     string input;
     int countOfLines;
@@ -66,8 +72,8 @@ int main() {
         b = getRandom(n);
         line equat;
         equat.x_k = k;
-        equat.free_k = k;
-        equat.cost = k;
+        equat.free_k = b;
+        equat.cost = n;
         MassOfLines[i] = equat;
         if (k == 1) {
             write_f << 'x';
@@ -94,5 +100,12 @@ int main() {
         cout << s << '\n';
     }
     read_f.close();
+    vector<dot> dots;
+    for (int i = 0; i < countOfLines - 1; ++i) {
+        for (int j = i + 1; j < countOfLines; ++j) {
+            pair<int, int> coordOfDot;
+
+        }
+    }
     return 0;
 }
