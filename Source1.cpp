@@ -4,17 +4,18 @@
 #include <vector>
 #include <ctime>
 #include <string>
+#include <algorithm>
 #include <set>
 
 using namespace std;
 // вводится с клавиатуры число прямых, генерируемых в файл в формате kx+b=0 n,n-вес графа. все коэффициенты рандомятся в диапазоне +-3n
 // n-вес прямой (стоимость прохода по ней). найти 2 самые дорогие по стоимости перемещения друг к другу точки при условии испеользования каждой прямой не более одного раза. точки образуются на пересечении прямых
 
-int getRandom(int n) {
+int getRandom(const int n) {
     return -3 * n + (rand() % (6 * n + 1));
 }
 
-bool inputCheck(string input) {
+bool inputCheck(const string input) {
     if (input[0] == '0') {
         return true;
     }
@@ -26,7 +27,7 @@ bool inputCheck(string input) {
     return false;
 }
 
-int convertToInt(string input) {
+int convertToInt(const string input) {
     int num = 0;
     for (int i = 0; i < input.size(); ++i) {
         num = num * 10 + (int)(input[i] - 48);
@@ -41,18 +42,39 @@ struct line {
 };
 
 struct dot {
-    pair<int, int> coordinates;
-    vector<int> indexOfLines;
+    pair<double, double> coordinates;
+    set<int> indexOfLines;
 };
+
+int binSearch(const vector<dot> massOfDots, const pair<double, double> coordOfDot) {
+    if (massOfDots.size() == 0) {
+        return -1;
+    }
+    int l = 0;
+    int r = massOfDots.size();
+    while (r - l > 1) {
+        int m = (r + l) / 2;
+        if (massOfDots[m].coordinates >= coordOfDot) {
+            l = m;
+        } else {
+            r = m;
+        }
+    }
+    if (massOfDots[l].coordinates == coordOfDot) {
+        return l;
+    } else {
+        return -1;
+    }
+}
 
 int main() {
     string input;
     int countOfLines;
     while (true) {
-        cout << "Input count of linear equations (positive number): ";
+        cout << "Input count of linear equations (positive integer number withoout lead zero digit): ";
         cin >> input;
         if (inputCheck(input)) {
-            cout << "INVALID INPUT: type positive number without lead zero digit\n";
+            cout << "INVALID INPUT: you have written incorrect data\n";
         } else {
             countOfLines = convertToInt(input);
             break;
@@ -60,7 +82,7 @@ int main() {
     }
     srand(time(0));
     ofstream write_f("input.txt");
-    vector<line> MassOfLines(countOfLines);
+    vector<line> massOfLines(countOfLines);
     for (int i = 0; i < countOfLines; ++i) {
         int n;
         n = rand() % 12 + 3;
@@ -74,7 +96,7 @@ int main() {
         equat.x_k = k;
         equat.free_k = b;
         equat.cost = n;
-        MassOfLines[i] = equat;
+        massOfLines[i] = equat;
         if (k == 1) {
             write_f << 'x';
         } else if (k == -1) {
@@ -100,11 +122,33 @@ int main() {
         cout << s << '\n';
     }
     read_f.close();
-    vector<dot> dots;
+    vector<dot> massOfDots;
+    vector<vector<int>> dotsOnLines(countOfLines);
     for (int i = 0; i < countOfLines - 1; ++i) {
         for (int j = i + 1; j < countOfLines; ++j) {
-            pair<int, int> coordOfDot;
-
+            if (massOfLines[i].x_k == massOfLines[j].x_k) {
+                continue;
+            }
+            pair<double, double> coordOfDot;
+            double x, y;
+            x = (massOfLines[j].free_k - massOfLines[i].free_k) / (massOfLines[i].x_k - massOfLines[j].x_k);
+            y = massOfLines[i].x_k * x + massOfLines[i].free_k;
+            coordOfDot = make_pair(x, y);
+            int pos;
+            pos = binSearch(massOfDots, coordOfDot);
+            if (pos == -1) {
+                dot newDot;
+                newDot.coordinates = coordOfDot;
+                set<int> linesOfDot;
+                linesOfDot.insert(i);
+                linesOfDot.insert(j);
+                newDot.indexOfLines = linesOfDot;
+                massOfDots.push_back(newDot);
+                sort(massOfDots.begin(), massOfDots.end());
+            } else {
+                massOfDots[pos].indexOfLines.insert(i);
+                massOfDots[pos].indexOfLines.insert(j);
+            }
         }
     }
     return 0;
