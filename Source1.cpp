@@ -42,11 +42,11 @@ struct line {
 int main() {
     string input;
     int countOfLines;
-    cout << "Input count of linear equations (positive number): ";
     while (true) {
+        cout << "Input count of linear equations (positive number): ";
         cin >> input;
         if (inputCheck(input)) {
-            cout << "INVALID INPUT: type positive number without lead zero digit\nInput count of linear equations (positive number): ";
+            cout << "INVALID INPUT: type positive number without lead zero digit\n";
         } else {
             countOfLines = convertToInt(input);
             break;
