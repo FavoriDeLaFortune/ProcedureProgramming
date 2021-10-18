@@ -151,5 +151,29 @@ int main() {
             }
         }
     }
+    for (int i = 0; i < massOfDots.size(); ++i) {
+        for (int line: massOfDots[i].indexOfLines) {
+            dotsOnLines[line].push_back(i);
+        }
+    }
+    vector<vector<pair<int, int>>> graph(massOfDots.size());
+    for (int i = 0; i < massOfDots.size(); ++i) {
+        for (int j: massOfDots[i].indexOfLines) {
+            for (int l = 0; l < dotsOnLines[j].size(); ++l) {
+                if (i == dotsOnLines[j][l]) {
+                    continue;
+                }
+                pair<int, int> pointAndLine;
+                pointAndLine = make_pair(l, j);
+                graph[i].push_back(pointAndLine);
+            }
+        }
+    }
+    for (int i = 0; i < graph.size(); ++i) {
+        for (int j = 0; j < graph[i].size(); ++j) {
+            cout << '{' << graph[i][j].first << ', ' << graph[i][j].second << "} ";
+        }
+        cout << '\n';
+    }
     return 0;
 }
