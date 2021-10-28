@@ -11,6 +11,7 @@ using namespace std;
 
 // вводится с клавиатуры число прямых, генерируемых в файл в формате kx+b=0 n,n-вес графа. все коэффициенты рандомятся в диапазоне +-3n
 // n-вес прямой (стоимость прохода по ней). найти 2 самые дорогие по стоимости перемещения друг к другу точки при условии использования каждой прямой не более одного раза. точки образуются на пересечении прямых
+// сделать графический интерфейс пересечения линий. при ответе показать путь (линия->линия->линия.....)
 
 int getRandom(const int& n) { //получение случайного целого числа в диапазоне [-3 * n; 3 * n]
     return -3 * n + (rand() % (6 * n + 1));
@@ -46,6 +47,26 @@ struct dot {
     pair<double, double> coordinates;
     set<int> indexOfLines;
 };
+
+void pathBuild(int c, vector<int> & dotsMaxPath, vector<bool> & usedLines, const vector<dot> & massOfDots, const vector<line> & massOfLines, const vector<vector<int>> & dotsOnLines, int costPath) {
+    for (int line : massOfDots[c].indexOfLines) {
+        if (!usedLines[line]) {
+            for (int v : dotsOnLines[line]) {
+                if (v == c) {
+                    continue;
+                }
+                if (costPath + massOfLines[line].cost > dotsMaxPath[v]) {
+                    dotsMaxPath[v] = costPath + massOfLines[line].cost;
+                }
+                costPath += massOfLines[line].cost;
+                usedLines[line] = true;
+                pathBuild(v, dotsMaxPath, usedLines, massOfDots, massOfLines, dotsOnLines, costPath);
+                costPath -= massOfLines[line].cost;
+                usedLines[line] = false;
+            }
+        }
+    }
+}
 
 int binSearch(const vector<dot>& massOfDots, const pair<double, double>& coordOfDot) { //поиск точки в структуре massOfDots за O(log(n))
     if (massOfDots.size() == 0) {
@@ -165,7 +186,9 @@ int main() {
             dotsOnLines[line].push_back(i);
         }
     }
-    vector<vector<int>> graph(massOfDots.size()); //список смежности пар, где индекс массива-предка значит номер вершины, а индекс во вложенном означает номер вершины
+
+    /*
+    vector<vector<int>> graph(massOfDots.size()); //список смежности, где индекс массива-предка значит номер вершины, а индекс во вложенном означает номер вершины
     for (int i = 0; i < massOfDots.size(); ++i) {
         for (int j : massOfDots[i].indexOfLines) {
             for (int l = 0; l < dotsOnLines[j].size(); ++l) {
@@ -183,5 +206,21 @@ int main() {
         }
         cout << '\n';
     }
+    */
+
+    int maxDistPath = 0;
+    pair<int, int> maxDistPair;
+    for (int i = 0; i < massOfDots.size(); ++i) {
+        vector<int> dotsMaxPath(massOfDots.size(), 0);
+        vector<bool> usedLines(countOfLines, false);
+        pathBuild(i, dotsMaxPath, usedLines, massOfDots, massOfLines, dotsOnLines, 0);
+        for (int j = 0; j < dotsMaxPath.size(); ++j) {
+            if (maxDistPath <= dotsMaxPath[j]) {
+                maxDistPath = dotsMaxPath[j];
+                maxDistPair = make_pair(i, j);
+            }
+        }
+    }
+    cout << "maximum path cost between " << maxDistPair.first << " and " << maxDistPair.second << ". Path cost is equal to " << maxDistPath;
     return 0;
 }
