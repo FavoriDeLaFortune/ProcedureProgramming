@@ -13,6 +13,8 @@ using namespace std;
 // n-вес прямой (стоимость прохода по ней). найти 2 самые дорогие по стоимости перемещения друг к другу точки при условии использования каждой прямой не более одного раза. точки образуются на пересечении прямых
 // сделать графический интерфейс пересечения линий. при ответе показать путь (линия->линия->линия.....)
 
+long long SUM_OF_WEIGHTS = 0;
+
 int getRandom(const int& n) { //получение случайного целого числа в диапазоне [-3 * n; 3 * n]
     return -3 * n + (rand() % (6 * n + 1));
 }
@@ -48,19 +50,26 @@ struct dot {
     set<int> indexOfLines;
 };
 
-void pathBuild(int c, vector<int> & dotsMaxPath, vector<bool> & usedLines, const vector<dot> & massOfDots, const vector<line> & massOfLines, const vector<vector<int>> & dotsOnLines, int costPath) {
+void pathBuild(int c, vector<int> & dotsMaxPath, vector<bool> & usedLines, const vector<dot> & massOfDots, const vector<line> & massOfLines, const vector<vector<int>> & dotsOnLines, int costPath, bool & flag) {
     for (int line : massOfDots[c].indexOfLines) {
         if (!usedLines[line]) {
             for (int v : dotsOnLines[line]) {
+                if (flag) {
+                    return;
+                }
                 if (v == c) {
                     continue;
                 }
                 if (costPath + massOfLines[line].cost > dotsMaxPath[v]) {
                     dotsMaxPath[v] = costPath + massOfLines[line].cost;
                 }
+                if (dotsMaxPath[v] == SUM_OF_WEIGHTS) {
+                    flag = true;
+                    return;
+                }
                 costPath += massOfLines[line].cost;
                 usedLines[line] = true;
-                pathBuild(v, dotsMaxPath, usedLines, massOfDots, massOfLines, dotsOnLines, costPath);
+                pathBuild(v, dotsMaxPath, usedLines, massOfDots, massOfLines, dotsOnLines, costPath, flag);
                 costPath -= massOfLines[line].cost;
                 usedLines[line] = false;
             }
@@ -116,6 +125,7 @@ int main() {
     for (int i = 0; i < countOfLines; ++i) {
         int n;
         n = rand() % 12 + 3;
+        SUM_OF_WEIGHTS += n;
         int k, b;
         k = 0;
         while (k == 0) {
@@ -213,12 +223,16 @@ int main() {
     for (int i = 0; i < massOfDots.size(); ++i) {
         vector<int> dotsMaxPath(massOfDots.size(), 0);
         vector<bool> usedLines(countOfLines, false);
-        pathBuild(i, dotsMaxPath, usedLines, massOfDots, massOfLines, dotsOnLines, 0);
+        bool flag = false;
+        pathBuild(i, dotsMaxPath, usedLines, massOfDots, massOfLines, dotsOnLines, 0, flag);
         for (int j = 0; j < dotsMaxPath.size(); ++j) {
             if (maxDistPath <= dotsMaxPath[j]) {
                 maxDistPath = dotsMaxPath[j];
                 maxDistPair = make_pair(i, j);
             }
+        }
+        if (maxDistPath == SUM_OF_WEIGHTS) {
+            break;
         }
     }
     cout << "maximum path cost between " << maxDistPair.first << " and " << maxDistPair.second << ". Path cost is equal to " << maxDistPath;
