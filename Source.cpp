@@ -14,6 +14,9 @@ using namespace std;
 // сделать графический интерфейс пересечения линий. при ответе показать путь (линия->линия->линия.....)
 
 long long SUM_OF_WEIGHTS = 0;
+vector<pair<int, vector<int>>> dotsMaxPath;
+vector<bool> usedLines;
+bool flag;
 
 int getRandom(const int& n) { //получение случайного целого числа в диапазоне [-3 * n; 3 * n]
     return -3 * n + (rand() % (6 * n + 1));
@@ -50,9 +53,10 @@ struct dot {
     set<int> indexOfLines;
 };
 
-void pathBuild(int c, vector<int> & dotsMaxPath, vector<bool> & usedLines, const vector<dot> & massOfDots, const vector<line> & massOfLines, const vector<vector<int>> & dotsOnLines, int costPath, bool & flag) {
+void pathBuild(int c, const vector<dot> & massOfDots, const vector<line> & massOfLines, const vector<vector<int>> & dotsOnLines, int costPath, vector<int> & linePath) {
     for (int line : massOfDots[c].indexOfLines) {
         if (!usedLines[line]) {
+            linePath.push_back(line + 1);
             for (int v : dotsOnLines[line]) {
                 if (flag) {
                     return;
@@ -60,19 +64,21 @@ void pathBuild(int c, vector<int> & dotsMaxPath, vector<bool> & usedLines, const
                 if (v == c) {
                     continue;
                 }
-                if (costPath + massOfLines[line].cost > dotsMaxPath[v]) {
-                    dotsMaxPath[v] = costPath + massOfLines[line].cost;
+                if (costPath + massOfLines[line].cost > dotsMaxPath[v].first) {
+                    dotsMaxPath[v].first = costPath + massOfLines[line].cost;
+                    dotsMaxPath[v].second = linePath;
                 }
-                if (dotsMaxPath[v] == SUM_OF_WEIGHTS) {
+                if (dotsMaxPath[v].first == SUM_OF_WEIGHTS) {
                     flag = true;
                     return;
                 }
                 costPath += massOfLines[line].cost;
                 usedLines[line] = true;
-                pathBuild(v, dotsMaxPath, usedLines, massOfDots, massOfLines, dotsOnLines, costPath, flag);
+                pathBuild(v, massOfDots, massOfLines, dotsOnLines, costPath, linePath);
                 costPath -= massOfLines[line].cost;
                 usedLines[line] = false;
             }
+            linePath.erase(linePath.end() - 1);
         }
     }
 }
@@ -159,7 +165,7 @@ int main() {
     for (int i = 0; i < countOfLines; ++i) {
         string s;
         getline(read_f, s);
-        cout << s << '\n';
+        cout << i + 1 << ") " << s << '\n';
     }
     read_f.close();
     vector<dot> massOfDots; //массив уникальных точек, образованных при пересечении прямых
@@ -219,22 +225,31 @@ int main() {
     */
 
     int maxDistPath = 0;
+    vector<int> maxLinePath;
     pair<int, int> maxDistPair;
     for (int i = 0; i < massOfDots.size(); ++i) {
-        vector<int> dotsMaxPath(massOfDots.size(), 0);
-        vector<bool> usedLines(countOfLines, false);
-        bool flag = false;
-        pathBuild(i, dotsMaxPath, usedLines, massOfDots, massOfLines, dotsOnLines, 0, flag);
+        dotsMaxPath.resize(massOfDots.size());
+        usedLines.resize(countOfLines, false);
+        flag = false;
+        vector<int> linePath;
+        pathBuild(i, massOfDots, massOfLines, dotsOnLines, 0, linePath);
         for (int j = 0; j < dotsMaxPath.size(); ++j) {
-            if (maxDistPath <= dotsMaxPath[j]) {
-                maxDistPath = dotsMaxPath[j];
+            if (maxDistPath < dotsMaxPath[j].first) {
+                maxDistPath = dotsMaxPath[j].first;
                 maxDistPair = make_pair(i, j);
+                maxLinePath = dotsMaxPath[j].second;
             }
         }
         if (maxDistPath == SUM_OF_WEIGHTS) {
             break;
         }
     }
-    cout << "maximum path cost between " << maxDistPair.first << " and " << maxDistPair.second << ". Path cost is equal to " << maxDistPath;
+    cout << "maximum path cost between " << maxDistPair.first << " and " << maxDistPair.second << ". Path cost is equal to " << maxDistPath << "\nPath: ";
+    for (int i = 0; i < maxLinePath.size(); ++i) {
+        cout << maxLinePath[i];
+        if (i != maxLinePath.size() - 1) {
+            cout << " -> ";
+        }
+    }
     return 0;
 }
