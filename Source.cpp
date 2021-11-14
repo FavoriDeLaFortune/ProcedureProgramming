@@ -53,7 +53,7 @@ struct dot {
     set<int> indexOfLines;
 };
 
-void pathBuild(int c, const vector<dot> & massOfDots, const vector<line> & massOfLines, const vector<vector<int>> & dotsOnLines, int costPath, vector<int> & linePath) {
+void pathBuild(int c, const vector<dot>& massOfDots, const vector<line>& massOfLines, const vector<vector<int>>& dotsOnLines, int costPath, vector<int>& linePath) {
     for (int line : massOfDots[c].indexOfLines) {
         if (!usedLines[line]) {
             linePath.push_back(line + 1);
@@ -116,7 +116,7 @@ int main() {
     string input; //кол-во линейных уравнений в типе string
     int countOfLines; //кол-во линейных уравнений в типе int
     while (true) { //защищенный ввод кол-ва линейных уравнений
-        cout << "Input count of linear equations (positive integer number withoout lead zero digit): ";
+        cout << "Input count of linear equations (positive integer number without lead zero digit): ";
         cin >> input;
         if (inputCheck(input)) {
             cout << "INVALID INPUT: you have written incorrect data\n";
@@ -234,7 +234,7 @@ int main() {
         vector<int> linePath;
         pathBuild(i, massOfDots, massOfLines, dotsOnLines, 0, linePath);
         for (int j = 0; j < dotsMaxPath.size(); ++j) {
-            if (maxDistPath < dotsMaxPath[j].first) {
+            if (maxDistPath <= dotsMaxPath[j].first) {
                 maxDistPath = dotsMaxPath[j].first;
                 maxDistPair = make_pair(i, j);
                 maxLinePath = dotsMaxPath[j].second;
@@ -244,12 +244,28 @@ int main() {
             break;
         }
     }
-    cout << "maximum path cost between " << maxDistPair.first << " and " << maxDistPair.second << ". Path cost is equal to " << maxDistPath << "\nPath: ";
+    cout << "maximum path cost between (" << massOfDots[maxDistPair.first].coordinates.first << ", " << massOfDots[maxDistPair.first].coordinates.second 
+        <<  ") and (" << massOfDots[maxDistPair.second].coordinates.first << ", " << massOfDots[maxDistPair.second].coordinates.second << "). Path cost is equal to " << maxDistPath << "\nPath: ";
     for (int i = 0; i < maxLinePath.size(); ++i) {
         cout << maxLinePath[i];
         if (i != maxLinePath.size() - 1) {
             cout << " -> ";
         }
+    }
+    cout << "\n\n";
+    for (int i = 0; i < 236; ++i) {
+        cout << '_';
+    }
+    cout << '\n';
+    vector<vector<char>> graph(50, vector<char>(236, '.'));
+    for (int i = 0; i < 50; ++i) {
+        graph[i][118] = '|';
+    }
+    for (int i = 0; i < 50; ++i) {
+        for (int j = 0; j < 236; ++j) {
+            cout << graph[i][j];
+        }
+        cout << '\n';
     }
     return 0;
 }
