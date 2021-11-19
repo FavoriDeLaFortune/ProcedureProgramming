@@ -6,6 +6,7 @@
 #include <string>
 #include <algorithm>
 #include <set>
+#include <GLFW/glfw3.h>
 
 using namespace std;
 
@@ -252,20 +253,35 @@ int main() {
             cout << " -> ";
         }
     }
-    cout << "\n\n";
-    for (int i = 0; i < 236; ++i) {
-        cout << '_';
+
+    GLFWwindow* window;
+
+    /* Initialize the library */
+    if (!glfwInit())
+        return -1;
+
+    /* Create a windowed mode window and its OpenGL context */
+    window = glfwCreateWindow(640, 480, "graphic of linear equations", NULL, NULL);
+    if (!window) {
+        glfwTerminate();
+        return -1;
     }
-    cout << '\n';
-    vector<vector<char>> graph(50, vector<char>(236, '.'));
-    for (int i = 0; i < 50; ++i) {
-        graph[i][118] = '|';
+
+    /* Make the window's context current */
+    glfwMakeContextCurrent(window);
+
+    /* Loop until the user closes the window */
+    while (!glfwWindowShouldClose(window)) {
+        /* Render here */
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        /* Swap front and back buffers */
+        glfwSwapBuffers(window);
+
+        /* Poll for and process events */
+        glfwPollEvents();
     }
-    for (int i = 0; i < 50; ++i) {
-        for (int j = 0; j < 236; ++j) {
-            cout << graph[i][j];
-        }
-        cout << '\n';
-    }
+
+    glfwTerminate();
     return 0;
 }
