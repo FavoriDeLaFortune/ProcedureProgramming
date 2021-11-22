@@ -14,6 +14,8 @@ using namespace std;
 // n-вес прямой (стоимость прохода по ней). найти 2 самые дорогие по стоимости перемещения друг к другу точки при условии использования каждой прямой не более одного раза. точки образуются на пересечении прямых
 // сделать графический интерфейс пересечения линий. при ответе показать путь (линия->линия->линия.....)
 
+const int SCREEN_HEIGHT = 600;
+const int SCREEN_WIDTH = 800;
 long long SUM_OF_WEIGHTS = 0;
 vector<pair<int, vector<int>>> dotsMaxPath;
 vector<bool> usedLines;
@@ -111,6 +113,10 @@ bool cmp(const dot& a, const dot& b) { // компаратор к сортиро
     } else {
         return false;
     }
+}
+
+void drawGraphic() {
+
 }
 
 int main() {
@@ -259,9 +265,9 @@ int main() {
     /* Initialize the library */
     if (!glfwInit())
         return -1;
-
+      
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "graphic of linear equations", NULL, NULL);
+    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "graphic of linear equations", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -270,10 +276,38 @@ int main() {
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+    glViewport(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, SCREEN_WIDTH, 0, SCREEN_HEIGHT, 0, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    GLfloat lineVertices[] =
+    {
+        200, 100, 0,
+        100, 300, 0
+    };
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)) {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glBegin(GL_LINES);
+        glColor3f(1, 1, 1);
+        glVertex2f(800, 300);
+        glVertex2f(0, 300);
+        glVertex2f(400, 600);
+        glVertex2f(400, 0);
+        glEnd();
+
+        glBegin(GL_LINES);
+        glColor3f(1.0, 0, 0);
+        glVertex2i(100, 100);
+        glVertex2i(200, 200);
+        glEnd();
+
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
