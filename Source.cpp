@@ -21,8 +21,76 @@ vector<pair<int, vector<int>>> dotsMaxPath;
 vector<bool> usedLines;
 bool flag;
 
-int getRandom(const int& n) { //получение случайного целого числа в диапазоне [-3 * n; 3 * n]
-    return -3 * n + (rand() % (6 * n + 1));
+int getRandomK(const int& n, const int& k1, const int& k2) { //получение случайного целого коэффициента k в диапазоне [-3 * n; 3 * n]
+    if (k1 == -100) {
+        return -n / 2 + (rand() % (n / 2 + 1));
+    }
+    if (k2 == -100) {
+        int r = rand() % 2;
+        if (r == 0) {
+            return rand() % (n / 2);
+        } else {
+            return rand() % (n / 2) - (n / 2);
+        }
+    }
+    if (k1 > 0 && k2 < 0) {
+        int r = rand() % 4;
+        if (r >= 0 && r <= 2) {
+            return rand() % (n / 2);
+        } else {
+            return rand() % (n / 2) - (n / 2);
+        }
+    }
+    if (k1 < 0 && k2 > 0) {
+        int r = rand() % 4;
+        if (r >= 0 && r <= 2) {
+            return rand() % (n / 2) - (n / 2);
+        } else {
+            return rand() % (n / 2);
+        }
+    }
+    if (k1 < 0 && k2 < 0) {
+        return rand() % (n / 2);
+    } else {
+        return rand() % (n / 2) - (n / 2);
+    }
+}
+
+int getRandomB(const int& n, const int& b1, const int& b2, const int& k1, const int& k2, const int& k) { //получение случайного целого коэффициента b в диапазоне [-3 * n; 3 * n]
+    if (b1 == -100) {
+        return -3 * n + (rand() % (6 * n + 1));
+    }
+    if (b2 == -100 && k1 != k) {
+        int r = rand() % 2;
+        if (r == 0) {
+            return rand() % (3 * n);
+        } else {
+            return rand() % (3 * n) - 3 * n;
+        }
+    }
+    if (b2 == -100 && k1 == k) {
+        int b;
+        if (b1 >= 0) {
+            b = -3 * n + (rand() % (3 * n + 1)) - 150;
+        } else {
+            b = rand() % (3 * n + 1) + 150;
+        }
+        return b;
+    }
+    int r = rand() % 4;
+    if (b1 > 0) {
+        if (r >= 0 && r <= 2) {
+            return -3 * n + (rand() % (3 * n + 1)) - 150;
+        } else {
+            return rand() % (3 * n + 1) + 150;
+        }
+    } else {
+        if (r >= 0 && r <= 2) {
+            return rand() % (3 * n + 1) + 150;
+        } else {
+            return -3 * n + (rand() % (3 * n + 1)) - 150;
+        }
+    }
 }
 
 bool inputCheck(const string& input) { //проверка правильности ввода
@@ -115,10 +183,6 @@ bool cmp(const dot& a, const dot& b) { // компаратор к сортиро
     }
 }
 
-void drawGraphic() {
-
-}
-
 int main() {
     string input; //кол-во линейных уравнений в типе string
     int countOfLines; //кол-во линейных уравнений в типе int
@@ -135,16 +199,22 @@ int main() {
     srand(time(0));
     ofstream write_f("input.txt");
     vector<line> massOfLines(countOfLines); //вектор линий
+    int b1, b2, k1, k2;
+    b1 = b2 = k1 = k2 = -100;
     for (int i = 0; i < countOfLines; ++i) {
         int n;
-        n = rand() % 12 + 3;
+        n = rand() % 70 + 3;
         SUM_OF_WEIGHTS += n;
         int k, b;
         k = 0;
         while (k == 0) {
-            k = getRandom(n);
+            k = getRandomK(n, k1, k2);
         }
-        b = getRandom(n);
+        b = getRandomB(n, b1, b2, k1, k2, k);
+        k2 = k1;
+        k1 = k;
+        b2 = b1;
+        b1 = b;
         line equat;
         equat.x_k = k;
         equat.free_k = b;
@@ -176,11 +246,6 @@ int main() {
     }
     read_f.close();
     vector<dot> massOfDots; //массив уникальных точек, образованных при пересечении прямых
-    double y_max, y_min, x_max, x_min;
-    y_max = -10000;
-    y_min = 10000;
-    x_max = -10000;
-    x_min = 10000;
     for (int i = 0; i < countOfLines - 1; ++i) { //перебор всех возможных пересечений линий
         for (int j = i + 1; j < countOfLines; ++j) {
             if (massOfLines[i].x_k == massOfLines[j].x_k) {
@@ -190,10 +255,6 @@ int main() {
             double x, y;
             x = ((double)massOfLines[j].free_k - massOfLines[i].free_k) / (massOfLines[i].x_k - massOfLines[j].x_k);
             y = massOfLines[i].x_k * x + massOfLines[i].free_k;
-            x_max = max(x_max, x);
-            y_max = max(y_max, y);
-            y_min = min(y_min, y);
-            x_min = min(x_min, x);
             coordOfDot = make_pair(x, y);
             int pos;
             pos = binSearch(massOfDots, coordOfDot);
@@ -218,27 +279,6 @@ int main() {
             dotsOnLines[line].push_back(i);
         }
     }
-
-    /*
-    vector<vector<int>> graph(massOfDots.size()); //список смежности, где индекс массива-предка значит номер вершины, а индекс во вложенном означает номер вершины
-    for (int i = 0; i < massOfDots.size(); ++i) {
-        for (int j : massOfDots[i].indexOfLines) {
-            for (int l = 0; l < dotsOnLines[j].size(); ++l) {
-                if (i == dotsOnLines[j][l]) {
-                    continue;
-                }
-                graph[i].push_back(dotsOnLines[j][l]);
-            }
-        }
-    }
-    for (int i = 0; i < graph.size(); ++i) {
-        cout << i << " = ";
-        for (int j = 0; j < graph[i].size(); ++j) {
-            cout << graph[i][j] << ", ";
-        }
-        cout << '\n';
-    }
-    */
 
     int maxDistPath = 0;
     vector<int> maxLinePath;
