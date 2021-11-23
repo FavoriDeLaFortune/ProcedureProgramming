@@ -176,6 +176,11 @@ int main() {
     }
     read_f.close();
     vector<dot> massOfDots; //массив уникальных точек, образованных при пересечении прямых
+    double y_max, y_min, x_max, x_min;
+    y_max = -10000;
+    y_min = 10000;
+    x_max = -10000;
+    x_min = 10000;
     for (int i = 0; i < countOfLines - 1; ++i) { //перебор всех возможных пересечений линий
         for (int j = i + 1; j < countOfLines; ++j) {
             if (massOfLines[i].x_k == massOfLines[j].x_k) {
@@ -185,6 +190,10 @@ int main() {
             double x, y;
             x = ((double)massOfLines[j].free_k - massOfLines[i].free_k) / (massOfLines[i].x_k - massOfLines[j].x_k);
             y = massOfLines[i].x_k * x + massOfLines[i].free_k;
+            x_max = max(x_max, x);
+            y_max = max(y_max, y);
+            y_min = min(y_min, y);
+            x_min = min(x_min, x);
             coordOfDot = make_pair(x, y);
             int pos;
             pos = binSearch(massOfDots, coordOfDot);
@@ -283,12 +292,6 @@ int main() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    GLfloat lineVertices[] =
-    {
-        200, 100, 0,
-        100, 300, 0
-    };
-
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)) {
         /* Render here */
@@ -303,9 +306,11 @@ int main() {
         glEnd();
 
         glBegin(GL_LINES);
-        glColor3f(1.0, 0, 0);
-        glVertex2i(100, 100);
-        glVertex2i(200, 200);
+        glColor3f(0, 1, 0);
+        for (int i = 0; i < countOfLines; ++i) {
+            glVertex2f(0, massOfLines[i].x_k* (-SCREEN_WIDTH / 2) + massOfLines[i].free_k + SCREEN_HEIGHT / 2);
+            glVertex2f(SCREEN_WIDTH, massOfLines[i].x_k* (SCREEN_WIDTH / 2) + massOfLines[i].free_k + SCREEN_HEIGHT / 2);
+        }
         glEnd();
 
 
